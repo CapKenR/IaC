@@ -70,13 +70,12 @@ resource "azurerm_virtual_machine" "lb2-vm" {
 	}
 	
     inline = [
-      "sudo apt-get -y install apt-transport-https ca-certificates curl",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-      "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
       "sudo apt-get update",
-      "sudo apt-get -y install docker-ce",
-	  "sudo groupadd docker",
-	  "sudo usermod -aG docker docker"
+      "sudo apt-get install nginx",
+      "sudo systemctl enable nginx",
+      "sudo systemctl start nginx",
+      "sudo ufw allow 'Nginx Full'",
+      "echo \"y\" | sudo ufw enable"
     ]
   }
 }
