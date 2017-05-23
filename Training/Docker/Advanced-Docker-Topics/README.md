@@ -1,5 +1,13 @@
 # Advanced Docker Topics
 Terraform configuration files for setting up a training lab in Azure for the Advanced Docker Topics class.
+
+Creates the following virtual machines.
+```
+node-a	Ubuntu 16.04-LTS VM
+node-b	Ubuntu 16.04-LTS VM
+node-c	Ubuntu 16.04-LTS VM
+```
+
 Create a secret.tfvars file (ignored by Git) that looks like the following to supply your Azure credentials. (See the [Creating Credentials](https://www.terraform.io/docs/providers/azurerm/index.html#creating-credentials) section of the [Microsoft Azure Provider](https://www.terraform.io/docs/providers/azurerm/index.html) page of the Terraform documentation for details.)
 
 ```
