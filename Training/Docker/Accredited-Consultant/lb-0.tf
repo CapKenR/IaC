@@ -3,7 +3,7 @@ resource "azurerm_public_ip" "lb0-publicip" {
   location                     = "${var.location}"
   resource_group_name          = "${azurerm_resource_group.resourcegroup.name}"
   public_ip_address_allocation = "dynamic"
-  domain_name_label            = "cap-${var.user}-dac-lb-0"
+  domain_name_label            = "cap-${var.student}-dac-lb-0"
 
   tags {
     environment = "${var.environment}"

@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "storageaccount" {
-  name                = "${var.user}adtstorage"
+  name                = "${var.student}adtstorage"
   resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
   location            = "${var.location}"
   account_type        = "Standard_LRS"
