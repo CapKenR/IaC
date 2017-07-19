@@ -1,7 +1,7 @@
 variable "student" {}
 variable "password" {}
 variable "location" { default = "westcentralus" }
-variable "environment" { default = "Training" }
+variable "environment" { default = "Test" }
 variable "subscription_id" {}
 variable "client_id" {}
 variable "client_secret" {}
