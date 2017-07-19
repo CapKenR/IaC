@@ -1,4 +1,4 @@
-variable "student" {}
+variable "user" {}
 variable "password" {}
 variable "location" { default = "westcentralus" }
 variable "environment" { default = "Test" }
