@@ -1,3 +1,12 @@
+resource "azurerm_availability_set" "ucp-as" {
+  name                = "ucp-as"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.resourcegroup.name}"
+  tags {
+    environment = "${var.environment}"
+  }
+}
+
 resource "azurerm_public_ip" "ucp-publicip" {
   name                         = "ucp-${count.index}-ip"
   location                     = "${var.location}"
@@ -20,7 +29,7 @@ resource "azurerm_network_interface" "ucp-networkinterface" {
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "dynamic"
 	public_ip_address_id          = "${element(azurerm_public_ip.ucp-publicip.*.id,count.index)}"
-	}
+  }
   count = "${var.ucp_count}"
 }
 
@@ -29,6 +38,7 @@ resource "azurerm_virtual_machine" "ucp-vm" {
   location              = "${var.location}"
   resource_group_name   = "${azurerm_resource_group.resourcegroup.name}"
   network_interface_ids = ["${element(azurerm_network_interface.ucp-networkinterface.*.id,count.index)}"]
+  availability_set_id   = "${azurerm_availability_set.ucp-as.id}"
   vm_size               = "Standard_DS1_v2"
   storage_image_reference {
     publisher = "Canonical"
@@ -56,7 +66,7 @@ resource "azurerm_virtual_machine" "ucp-vm" {
   provisioner "remote-exec" {
     connection {
 	  type     = "ssh"
-	  host     = "${element(azurerm_public_ip.ucp-publicip.*.domain_name_label,count.index)}}.${var.location}.cloudapp.azure.com"
+	  host     = "${element(azurerm_public_ip.ucp-publicip.*.domain_name_label,count.index)}.${var.location}.cloudapp.azure.com"
 	  user     = "docker"
 	  password = "${var.password}"
 	}

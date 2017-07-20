@@ -20,7 +20,7 @@ resource "azurerm_network_interface" "wnw-networkinterface" {
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "dynamic"
 	public_ip_address_id          = "${element(azurerm_public_ip.wnw-publicip.*.id,count.index)}"
-	}
+  }
   count = "${var.wnw_count}"
 }
 
@@ -29,6 +29,7 @@ resource "azurerm_virtual_machine" "wnw-vm" {
   location              = "${var.location}"
   resource_group_name   = "${azurerm_resource_group.resourcegroup.name}"
   network_interface_ids = ["${element(azurerm_network_interface.wnw-networkinterface.*.id,count.index)}"]
+  availability_set_id   = "${azurerm_availability_set.worker-as.id}"
   vm_size               = "Standard_DS1_v2"
   storage_image_reference {
     publisher = "MicrosoftWindowsServer"

@@ -1,3 +1,12 @@
+resource "azurerm_availability_set" "worker-as" {
+  name                = "worker-as"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.resourcegroup.name}"
+  tags {
+    environment = "${var.environment}"
+  }
+}
+
 resource "azurerm_public_ip" "wnl-publicip" {
   name                         = "worker-lin-${count.index}-ip"
   location                     = "${var.location}"
@@ -20,7 +29,7 @@ resource "azurerm_network_interface" "wnl-networkinterface" {
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "dynamic"
 	public_ip_address_id          = "${element(azurerm_public_ip.wnl-publicip.*.id,count.index)}"
-	}
+  }
   count = "${var.wnl_count}"
 }
 
@@ -29,6 +38,7 @@ resource "azurerm_virtual_machine" "wnl-vm" {
   location              = "${var.location}"
   resource_group_name   = "${azurerm_resource_group.resourcegroup.name}"
   network_interface_ids = ["${element(azurerm_network_interface.wnl-networkinterface.*.id,count.index)}"]
+  availability_set_id   = "${azurerm_availability_set.worker-as.id}"
   vm_size               = "Standard_DS1_v2"
   storage_image_reference {
     publisher = "Canonical"
@@ -56,15 +66,15 @@ resource "azurerm_virtual_machine" "wnl-vm" {
   provisioner "remote-exec" {
     connection {
 	  type     = "ssh"
-	  host     = "${element(azurerm_public_ip.wnl-publicip.*.domain_name_label,count.index)}}.${var.location}.cloudapp.azure.com"
+	  host     = "${element(azurerm_public_ip.wnl-publicip.*.domain_name_label,count.index)}.${var.location}.cloudapp.azure.com"
 	  user     = "docker"
 	  password = "${var.password}"
 	}
     inline = [
       "sudo apt-get -y install apt-transport-https ca-certificates curl",
       "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-      "curl -fsSL https://storebits.docker.com/ee/linux/sub-0fc42e50-bfbc-4e66-8789-841113d6130d/ubuntu/gpg | sudo apt-key add -",
-      "sudo add-apt-repository \"deb [arch=amd64] https://storebits.docker.com/ee/linux/sub-0fc42e50-bfbc-4e66-8789-841113d6130d/ubuntu $(lsb_release -cs) test\"",
+      "curl -fsSL ${var.docker_url}/ubuntu/gpg | sudo apt-key add -",
+      "sudo add-apt-repository \"deb [arch=amd64] ${var.docker_url}/ubuntu $(lsb_release -cs) test\"",
       "sudo apt-get update",
       "sudo apt-get -y install docker-ee",
 	  "sudo groupadd docker",
