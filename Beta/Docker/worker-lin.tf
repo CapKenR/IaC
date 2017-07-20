@@ -29,7 +29,7 @@ resource "azurerm_virtual_machine" "wnl-vm" {
   location              = "${var.location}"
   resource_group_name   = "${azurerm_resource_group.resourcegroup.name}"
   network_interface_ids = ["${element(azurerm_network_interface.wnl-networkinterface.*.id,count.index)}"]
-  vm_size               = "Standard_A0"
+  vm_size               = "Standard_DS1_v2"
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
@@ -52,6 +52,24 @@ resource "azurerm_virtual_machine" "wnl-vm" {
   }
   tags {
     environment = "${var.environment}"
+  }
+  provisioner "remote-exec" {
+    connection {
+	  type     = "ssh"
+	  host     = "${element(azurerm_public_ip.wnl-publicip.*.domain_name_label,count.index)}}.${var.location}.cloudapp.azure.com"
+	  user     = "docker"
+	  password = "${var.password}"
+	}
+    inline = [
+      "sudo apt-get -y install apt-transport-https ca-certificates curl",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+      "curl -fsSL https://storebits.docker.com/ee/linux/sub-0fc42e50-bfbc-4e66-8789-841113d6130d/ubuntu/gpg | sudo apt-key add -",
+      "sudo add-apt-repository \"deb [arch=amd64] https://storebits.docker.com/ee/linux/sub-0fc42e50-bfbc-4e66-8789-841113d6130d/ubuntu $(lsb_release -cs) test\"",
+      "sudo apt-get update",
+      "sudo apt-get -y install docker-ee",
+	  "sudo groupadd docker",
+	  "sudo usermod -aG docker docker"
+    ]
   }
   count = "${var.wnl_count}"
 }
